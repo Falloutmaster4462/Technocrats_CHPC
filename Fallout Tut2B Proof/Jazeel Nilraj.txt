@@ -1,0 +1,37 @@
+Jazeel Nilraj
+Technomats
+Tut 2B
+Btop
+
+
+
+I enjoyed running and installing btop via the Rocky Linux interface. It was easier than expected to download and install. The only challenged faced was the swop from Ubuntu Server to Rocky Linux v9.
+
+TTTTTTTTTTTTTTTTTTTTTTTEEEEEEEEEEEEEEEEEEEEEE       CCCCCCCCCCCCCHHHHHHHHH     HHHHHHHHHNNNNNNNN        NNNNNNNN     OOOOOOOOO     MMMMMMMM               MMMMMMMM               AAA         TTTTTTTTTTTTTTTTTTTTTTT   SSSSSSSSSSSSSSS 
+T:::::::::::::::::::::TE::::::::::::::::::::E    CCC::::::::::::CH:::::::H     H:::::::HN:::::::N       N::::::N   OO:::::::::OO   M:::::::M             M:::::::M              A:::A        T:::::::::::::::::::::T SS:::::::::::::::S
+T:::::::::::::::::::::TE::::::::::::::::::::E  CC:::::::::::::::CH:::::::H     H:::::::HN::::::::N      N::::::N OO:::::::::::::OO M::::::::M           M::::::::M             A:::::A       T:::::::::::::::::::::TS:::::SSSSSS::::::S
+T:::::TT:::::::TT:::::TEE::::::EEEEEEEEE::::E C:::::CCCCCCCC::::CHH::::::H     H::::::HHN:::::::::N     N::::::NO:::::::OOO:::::::OM:::::::::M         M:::::::::M            A:::::::A      T:::::TT:::::::TT:::::TS:::::S     SSSSSSS
+TTTTTT  T:::::T  TTTTTT  E:::::E       EEEEEEC:::::C       CCCCCC  H:::::H     H:::::H  N::::::::::N    N::::::NO::::::O   O::::::OM::::::::::M       M::::::::::M           A:::::::::A     TTTTTT  T:::::T  TTTTTTS:::::S            
+        T:::::T          E:::::E            C:::::C                H:::::H     H:::::H  N:::::::::::N   N::::::NO:::::O     O:::::OM:::::::::::M     M:::::::::::M          A:::::A:::::A            T:::::T        S:::::S            
+        T:::::T          E::::::EEEEEEEEEE  C:::::C                H::::::HHHHH::::::H  N:::::::N::::N  N::::::NO:::::O     O:::::OM:::::::M::::M   M::::M:::::::M         A:::::A A:::::A           T:::::T         S::::SSSS         
+        T:::::T          E:::::::::::::::E  C:::::C                H:::::::::::::::::H  N::::::N N::::N N::::::NO:::::O     O:::::OM::::::M M::::M M::::M M::::::M        A:::::A   A:::::A          T:::::T          SS::::::SSSSS    
+        T:::::T          E:::::::::::::::E  C:::::C                H:::::::::::::::::H  N::::::N  N::::N:::::::NO:::::O     O:::::OM::::::M  M::::M::::M  M::::::M       A:::::A     A:::::A         T:::::T            SSS::::::::SS  
+        T:::::T          E::::::EEEEEEEEEE  C:::::C                H::::::HHHHH::::::H  N::::::N   N:::::::::::NO:::::O     O:::::OM::::::M   M:::::::M   M::::::M      A:::::AAAAAAAAA:::::A        T:::::T               SSSSSS::::S 
+        T:::::T          E:::::E            C:::::C                H:::::H     H:::::H  N::::::N    N::::::::::NO:::::O     O:::::OM::::::M    M:::::M    M::::::M     A:::::::::::::::::::::A       T:::::T                    S:::::S
+        T:::::T          E:::::E       EEEEEEC:::::C       CCCCCC  H:::::H     H:::::H  N::::::N     N:::::::::NO::::::O   O::::::OM::::::M     MMMMM     M::::::M    A:::::AAAAAAAAAAAAA:::::A      T:::::T                    S:::::S
+      TT:::::::TT      EE::::::EEEEEEEE:::::E C:::::CCCCCCCC::::CHH::::::H     H::::::HHN::::::N      N::::::::NO:::::::OOO:::::::OM::::::M               M::::::M   A:::::A             A:::::A   TT:::::::TT      SSSSSSS     S:::::S
+      T:::::::::T      E::::::::::::::::::::E  CC:::::::::::::::CH:::::::H     H:::::::HN::::::N       N:::::::N OO:::::::::::::OO M::::::M               M::::::M  A:::::A               A:::::A  T:::::::::T      S::::::SSSSSS:::::S
+      T:::::::::T      E::::::::::::::::::::E    CCC::::::::::::CH:::::::H     H:::::::HN::::::N        N::::::N   OO:::::::::OO   M::::::M               M::::::M A:::::A                 A:::::A T:::::::::T      S:::::::::::::::SS 
+      TTTTTTTTTTT      EEEEEEEEEEEEEEEEEEEEEE       CCCCCCCCCCCCCHHHHHHHHH     HHHHHHHHHNNNNNNNN         NNNNNNN     OOOOOOOOO     MMMMMMMM               MMMMMMMMAAAAAAA                   AAAAAAATTTTTTTTTTT       SSSSSSSSSSSSSSS   
+
+                    ___           ___       ___       ___           ___                   
+      ___          /  /\         /  /\     /  /\     /  /\         /  /\          ___     
+     /  /\        /  /::\       /  /:/    /  /:/    /  /::\       /  /:/         /__/\    
+    /  /::\      /  /:/\:\     /  /:/    /  /:/    /  /:/\:\     /  /:/          \  \:\   
+   /  /:/\:\    /  /::\ \:\   /  /:/    /  /:/    /  /:/  \:\   /  /:/            \__\:\  
+  /  /::\ \:\  /__/:/\:\_\:\ /__/:/    /__/:/    /__/:/ \__\:\ /__/:/     /\      /  /::\ 
+ /__/:/\:\ \:\ \__\/  \:\/:/ \  \:\    \  \:\    \  \:\ /  /:/ \  \:\    /:/     /  /:/\:\
+ \__\/  \:\_\/      \__\::/   \  \:\    \  \:\    \  \:\  /:/   \  \:\  /:/     /  /:/__\/
+      \  \:\        /  /:/     \  \:\    \  \:\    \  \:\/:/     \  \:\/:/     /__/:/     
+       \__\/       /__/:/       \  \:\    \  \:\    \  \::/       \  \::/      \__\/      
+                   \__\/         \__\/     \__\/     \__\/         \__\/                  
