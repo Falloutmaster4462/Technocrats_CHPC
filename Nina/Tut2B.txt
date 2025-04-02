@@ -1,0 +1,15 @@
+Compiling btop from source on Rocky Linux was a valuable learning experience. Initially, setting up Rocky Linux presented mild challenges, particularly when configuring the environment and managing SSH access. Once resolved, the process of compiling btop itself was relatively straightforward, though I encountered some minor dependency issues that required installing additional libraries.
+
+From this process, I learned the importance of carefully reading the documentation and ensuring the environment is properly configured before starting the compilation. Additionally, setting up SSH on Rocky Linux taught me how to manage user permissions and network settings effectively.
+
+How SSH Keys Work
+SSH keys are a way to securely authenticate with a server without using a password. They consist of a pair: a private key (kept secure on the client) and a public key (stored on the server). When connecting, the client uses the private key to sign a message, and the server verifies it using the public key. This process ensures secure, passwordless login. Generating SSH keys using ssh-keygen and properly configuring them on both client and server sides were essential steps during the setup.
+
+Overall, I found the experience rewarding as it enhanced my understanding of compiling software from source and navigating Rocky Linux. Despite the initial setup hiccups, successfully running btop gave me a sense of accomplishment.
+
+
+
+
+
+
+
