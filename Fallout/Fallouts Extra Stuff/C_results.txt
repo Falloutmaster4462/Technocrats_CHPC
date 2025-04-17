@@ -1,0 +1,17 @@
+CPU speed:
+events per second: 1423.94
+
+General Statistics
+total time:	10.0322s
+total number of events: 14288
+
+Latency (ms)
+min:	4.82
+avg: 6.24
+max: 1015.35
+95th percentile: 7.30
+sum: 89227.28
+
+threads fairness
+events (avg/stddev):		1587.556/105.24
+execution time (avg/staddev): 9.9141/0.29
