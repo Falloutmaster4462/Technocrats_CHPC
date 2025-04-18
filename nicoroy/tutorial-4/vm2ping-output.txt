@@ -1,0 +1,9 @@
+PING google.com (142.251.47.78) 56(84) bytes of data.
+64 bytes from jnb03s07-in-f14.1e100.net (142.251.47.78): icmp_seq=1 ttl=63 time=87.2 ms
+64 bytes from jnb03s07-in-f14.1e100.net (142.251.47.78): icmp_seq=2 ttl=63 time=111 ms
+64 bytes from jnb03s07-in-f14.1e100.net (142.251.47.78): icmp_seq=3 ttl=63 time=22.4 ms
+64 bytes from jnb03s07-in-f14.1e100.net (142.251.47.78): icmp_seq=4 ttl=63 time=154 ms
+
+--- google.com ping statistics ---
+4 packets transmitted, 4 received, 0% packet loss, time 3005ms
+rtt min/avg/max/mdev = 22.445/93.827/154.454/47.738 ms
