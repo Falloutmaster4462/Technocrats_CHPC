@@ -17,7 +17,7 @@ The **CHPC Competition** focuses on high-performance computing, where teams comp
 ## 🚀 Getting Started  
 1. **Clone the repo:**  
    ```bash  
-   git clone https://github.com/Technocrats_CHPC.git  
+   https://github.com/Falloutmaster4462/Technocrats_CHPC.git  
    ```
    
 ## 📌 Goals  
