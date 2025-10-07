@@ -7,7 +7,7 @@ Welcome to our GitHub repository for the **CHPC (Centre for High Performance Com
 - **Nina (Team Leader)** – 3rd Year CS Student  
 - **Nicoroy** – 2nd Year CS Student  
 - **Jazeel** – 1st Year CS Student  
-- **Joey** – 1st Year CS Student  
+- **Joey** – 2nd Year CS Student  
 
 We bring a mix of experience and fresh perspectives to optimize and innovate in HPC!  
 
