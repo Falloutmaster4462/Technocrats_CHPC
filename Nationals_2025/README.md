@@ -13,26 +13,6 @@ This repository contains all code, scripts, documentation, and reports for our p
 | **Friday**   | 7:00 PM        | Online     | Weekly sync, code reviews, planning, and conceptual discussions.    |
 
 *Attendance is mandatory. Please notify the team lead in advance if you cannot make a meeting.*
-
----
-
-## 🚀 Sprint 1: Foundation & Tutorials (August - September)
-
-The goal of this sprint is to solidify our understanding of the core HPC concepts covered in the initial tutorials and establish our team workflows.
-
-### Weekly Breakdown
-
-### Weekly Schedule & Progress
-
-| Week | Dates | Topic | Tasks & Assignments |
-| :--- | :--- | :--- | :--- |
-| **1** | Aug 25 - 29 | **Tutorial 1 & 2** | **Hardware:** Document design pros/cons.<br>**Nina:** SSH, Package Mgmt, NixOS, HPL Compilation.<br>**Joey:** `nftables` Firewall, `chrony` NTP. |
-| **2** | Sept 1 - 5 | **Tutorial 2 Part 2** | **Jazeel:** NFS, User Accounts.<br>**Nicoroy:** Ansible Control Node, Inventory, Playbook. |
-| **3** | Sept 8 - 12 | **Tutorial 2 & 3 (Part 1)** | **Joey:** User Mgmt, ZeroTier VPN.<br>**Nicoroy & Nina:** LMOD, Build OpenBLAS/OpenMPI. |
-| **4** | Sept 15 - 19 | **Tutorial 3 (Part 2)** | **Nina:** Intel oneAPI, LinPACK Perf, Final Design.<br>**Jazeel:** Hardware Topology, Vtune Profiling. |
-| **5** | Sept 22 - 26 | **Tutorial 3 (Part 3)** | **TBD:** HPCG, GROMACS, LAMMPS, Qiskit. |
-| **6** | Sept 29 - Oct 3 | **Tutorial 4 (Part 2)** | *Content to be evaluated closer to the time.* |
-
 ---
 
 ## 👥 Team Roles & Responsibilities
@@ -62,5 +42,6 @@ For a task to be considered complete, it must meet the following criteria:
 2.  **Create a Branch:** Create a feature branch named `Report/Problem Name'.
 3.  **Commit & Push:** Make commits with clear messages. Push your branch.
 4.  **Open a Pull Request (PR):** Open a PR for review. Link it to the original issue.
+
 
 
