@@ -5,53 +5,215 @@ This repository contains all code, scripts, documentation, and reports for our p
 
 ---
 
-## 🗓️ Meeting Schedule
+# Technocrats SCC 2025 - Complete Deployment Guide
 
-| Day          | Time           | Mode       | Focus                                                               |
-| :----------- | :------------- | :--------- | :------------------------------------------------------------------ |
-| **Tuesday**  | 1:00 PM        | In-Person  | Hands-on labs, hardware work, deep-dive technical sessions.         |
-| **Friday**   | 7:00 PM        | Online     | Weekly sync, code reviews, planning, and conceptual discussions.    |
-
-*Attendance is mandatory. Please notify the team lead in advance if you cannot make a meeting.*
+> **Student Cluster Competition 2025 - CSIR CHPC**  
+> Team: Technocrats ("Shaka Zulu")  
+> Hardware: 3-node Intel Xeon Gold 6448H cluster (92 cores, 280GB RAM)
 
 ---
 
-## 🚀 Sprint 1: Foundation & Tutorials (August - September)
+## Table of Contents
 
-The goal of this sprint is to solidify our understanding of the core HPC concepts covered in the initial tutorials and establish our team workflows.
-
-### Weekly Breakdown
-
-### Weekly Schedule & Progress
-
-| Week | Dates | Topic | Tasks & Assignments |
-| :--- | :--- | :--- | :--- |
-| **1** | Aug 25 - 29 | **Tutorial 1 & 2** | **Hardware:** Document design pros/cons.<br>**Nina:** SSH, Package Mgmt, NixOS, HPL Compilation.<br>**Joey:** `nftables` Firewall, `chrony` NTP. |
-| **2** | Sept 1 - 5 | **Tutorial 2 Part 2** | **Jazeel:** NFS, User Accounts.<br>**Nicoroy:** Ansible Control Node, Inventory, Playbook. |
-| **3** | Sept 8 - 12 | **Tutorial 2 & 3 (Part 1)** | **Joey:** User Mgmt, ZeroTier VPN.<br>**Nicoroy & Nina:** LMOD, Build OpenBLAS/OpenMPI. |
-| **4** | Sept 15 - 19 | **Tutorial 3 (Part 2)** | **Nina:** Intel oneAPI, LinPACK Perf, Final Design.<br>**Jazeel:** Hardware Topology, Vtune Profiling. |
-| **5** | Sept 22 - 26 | **Tutorial 3 (Part 3)** | **TBD:** HPCG, GROMACS, LAMMPS, Qiskit. |
-| **6** | Sept 29 - Oct 3 | **Tutorial 4 (Part 2)** | *Content to be evaluated closer to the time.* |
+1. [Executive Summary](#executive-summary)
+2. [Hardware Overview](#hardware-overview)
+3. [Software Stack](#software-stack)
+4. [Benchmark Applications](#benchmark-applications)
+5. [Performance Targets](#performance-targets)
+6. [Team Roles & Responsibilities](#team-roles-&-responsibilities)
 
 ---
 
-## 🚀 Sprint 2: Foundation & Tutorials (20 Nov - 29 Nov)
+## Executive Summary
 
-Have a fully functional, optimized, production-ready HPC cluster that can run all required benchmarks reliably and efficiently.
+### Cluster Configuration
 
-| Week | Dates | Topic | Tasks & Assignments |
-| :--- | :--- | :--- | :--- |
-| **1** | **Nov 20 (Thu)** | **Tutorial 1 & 2** | **Docs:** Start repo documentation.<br>**SSH/Compile:** SSH Access ✅, Package Mgmt & Compiler Setup ✅, HPL Compilation ✅.<br>**Firewall/NTP:** Stateful firewall ✅, iptables/nftables ruleset ✅, chrony time sync ✅.<br>**Ansible:** Control Node, Inventory, Playbook Dev + Execution ✅.<br>**Pending:** User Accounts, ZeroTier Setup. |
-| **2** | **Nov 21 (Fri)** | **System Rebuild** | Reconstruct Rocky Linux environment from scratch. |
-| **3** | **Nov 22 (Sat)** | **Full Campus Build Day** | Meet on campus.<br>Test SSH keys, Networking (Firewall/NTP), Ansible Playbooks.<br>**Critical:** ZeroTier setup. |
-| **4** | **Nov 23 (Sun)** | **SLURM + Monitoring** | SLURM Completion (#1).<br>Grafana Dashboard setup (Joey). |
-| **5** | **Nov 24 (Mon–Tue)** | **Rocky Finalization** | Evaluate progress & next tasks.<br>Fully functional Rocky build ready for benchmarks.<br>Submit to mentors. |
-| **6** | **Nov 25–28 (Wed–Sat)** | **Optimization & Prep** | System + Benchmark Optimization!!!<br>Mini Interview Preparation.<br>HPC tuning & final system checks. |
-| **7** | **Nov 29 (Sun)** | **Competition Arrival** | Travel to venue & settle in. |
+**Technocrats Cluster Specifications:**
+- **Total Cores**: 92 (28 head + 32 + 32 compute) (+4 management)
+- **Total Memory**: 280GB (88GB + 96GB + 96GB) (+8GB management)
+- **Storage**: 1.92TB NVMe (head), 2× 240GB SATA SSD (compute)
+- **Network**: 10GbE SFP+ with RDMA support
+- **OS**: NixOS 24.05 (declarative, reproducible)
+
+### Competitive Position
+
+**Expected Results (with Intel oneAPI):**
+- **Technocrats Wins**: 4/7 official benchmarks (HPCG, ASCOT5, DFTB+, + secret)
+- **Strategy**: Dominate memory-intensive applications, optimize MD performance
+
+### Key Advantages
+
+1. **Memory Architecture**: 3GB per core average
+2. **NVMe I/O**: 3500 MB/s on head node
+3. **Uniform Configuration**: All nodes 96GB RAM (simplified management)
+4. **Dual Compiler Strategy**: Intel oneAPI + GCC for optimal performance
 
 ---
 
-## 👥 Team Roles & Responsibilities
+## Hardware Overview
+
+### Node Specifications
+
+#### Head Node (10.0.0.1)
+```
+Hostname: head-node
+CPU: 1× Intel Xeon Gold 6448H (32 cores @ 2.4GHz)
+  - Architecture: Sapphire Rapids (4th Gen Xeon Scalable)
+  - ISA: AVX-512, AMX (Advanced Matrix Extensions)
+Memory: 96GB DDR5-4800
+Storage: 1.92TB NVMe Gen4 SSD (HPE)
+Network: Broadcom BCM57412 10Gb 2-port SFP+
+Role: Management + Compute (28 cores for compute after overhead)
+```
+
+#### Compute Node 1 (10.0.0.2)
+```
+Hostname: compute-01
+CPU: 1× Intel Xeon Gold 6448H (32 cores @ 2.4GHz)
+Memory: 96GB DDR5-4800
+Storage: 240GB SATA SSD
+Network: Broadcom BCM57412 10Gb 2-port SFP+
+Role: Pure compute
+```
+
+#### Compute Node 2 (10.0.0.3)
+```
+Hostname: compute-02
+CPU: 1× Intel Xeon Gold 6448H (32 cores @ 2.4GHz)
+Memory: 96GB DDR5-4800
+Storage: 240GB SATA SSD
+Network: Broadcom BCM57412 10Gb 2-port SFP+
+Role: Pure compute
+```
+
+### Network Topology
+
+```
+Internet
+    │
+    │
+    └───── head-node (10.0.0.1) - Master
+            │   │
+            │   └─── NFS Server (/nvme/shared)
+            │
+            │
+            ├─── compute-01 (10.0.0.2)
+            │     │
+            │     └─── NFS Client (mount /shared)
+            │
+            └── compute-02 (10.0.0.3)
+                  │
+                  └─── NFS Client (mount /shared)
+
+Direct Attach Copper Cables: 3× 1m SFP+ DAC
+RDMA Support: Enabled on all NICs
+```
+---
+
+## Software Stack
+
+### Operating System
+
+**NixOS 24.05**
+- Declarative configuration
+- Reproducible builds
+- Atomic upgrades/rollbacks
+- Binary caching support
+
+### Deployment Tools
+
+1. **nixos-anywhere**: Initial OS installation from bare metal
+2. **Colmena**: Configuration management and updates during competition
+3. **disko**: Declarative disk partitioning
+4. **Nix Flakes**: Package management and build system
+
+### Compilers & Libraries
+
+**Primary (Intel oneAPI):**
+- Intel C++ Compiler (icx/icpx)
+- Intel Fortran Compiler (ifx)
+- Intel MPI Library
+- Intel MKL (Math Kernel Library)
+
+**Secondary (GCC):**
+- GCC 12.2 (C/C++/Fortran)
+- OpenMPI 4.1.6
+- OpenBLAS (multithreaded)
+
+### Job Scheduling
+
+**Slurm 23.02**
+- Head node: Controller (slurmctld)
+- All nodes: Compute daemons (slurmd)
+- Partitions: highmem, compute, all, management
+
+### File Sharing
+
+**NFS over RDMA**
+- Server: head-node (/nvme/shared)
+- Clients: compute nodes (mount at /shared)
+- Optimized for 10GbE with RDMA
+
+---
+
+## Benchmark Applications 
+
+### **Synthetic Benchmarks**
+
+- **HPCC (HPC Challenge)** — https://github.com/icl-utk-edu/hpcc  
+- **HPCG (High Performance Conjugate Gradients)** — https://www.hpcg-benchmark.org/
+
+### **Application Benchmarks**
+
+- **AmberMD** — https://ambermd.org  
+- **ASCOT5** — https://ascot4fusion.github.io/ascot5/  
+- **DFTB+** — https://dftbplus.org  
+- **HemeLB** — https://hemelb-dev.github.io/HemeLB-Carpentries/  
+- **MathWorks (MATLAB / Simulink)** — https://www.mathworks.com/products/parallel-computing.html  
+- **Secret Application(s)** — Revealed at Nationals  
+
+## Performance Targets
+
+### Official Benchmark Targets
+
+| Benchmark | Minimum (Pass) | Target (Competitive) | Stretch (Excellence) |
+|-----------|----------------|----------------------|----------------------|
+| **HPL** | 1.5 TFLOPS | 2.3 TFLOPS | 2.8 TFLOPS |
+| **HPCG** | 50 GFLOPS | 65 GFLOPS | 75 GFLOPS |
+| **AmberMD** | 400 ns/day | 520 ns/day | 580 ns/day |
+| **ASCOT5** | 6M p/hr | 9M p/hr | 11M p/hr |
+| **DFTB+** | 1200 atoms | 1700 atoms | 1900 atoms |
+| **HemeLB** | 900 MLUPS | 1100 MLUPS | 1250 MLUPS |
+| **MATLAB** | 92 workers | Quality focus | Accuracy emphasis |
+
+---
+### Competitive Analysis
+
+**Technocrats Should Win:**
+- HPCG (memory bandwidth)
+- ASCOT5 (NVMe I/O)
+- DFTB+ (system size)
+- Secret (if memory-intensive)
+
+**Technocrats Should Compete:**
+- HPL (with Intel MKL)
+- AmberMD (with optimization)
+
+**Technocrats May Trail:**
+- HemeLB (fewer cores)
+- MATLAB (fewer workers)
+
+### Scoring Strategy
+
+**Maximize Points:**
+1. **Dominate strength benchmarks** - Full points on HPCG, ASCOT5, DFTB+
+2. **Be competitive on HPL** - Intel MKL closes gap
+3. **Optimize AmberMD aggressively** 
+4. **Quality over quantity** - MATLAB emphasize accuracy
+5. **Secret benchmark** 
+
+---
+## Team Roles & Responsibilities
 
 | Name           | Primary Focus Area      | Secondary Focus       |
 | :------------- | :---------------------- | :-------------------- |
@@ -79,5 +241,18 @@ For a task to be considered complete, it must meet the following criteria:
 3.  **Commit & Push:** Make commits with clear messages. Push your branch.
 4.  **Open a Pull Request (PR):** Open a PR for review. Link it to the original issue.
 
+
+## License & Acknowledgments
+
+**Repository License**: MIT License (or as required by competition)
+
+**Acknowledgments:**
+- CSIR CHPC for hosting the competition
+- Intel for oneAPI toolkit
+- All open-source benchmark developers
+
+**Team**: Technocrats - "Shaka Zulu"  
+**Competition**: CSIR CHPC Student Cluster Competition 2025  
+**Hardware**: HPE ProLiant Gen11 Servers with Intel Xeon Gold 6448H
 
 
