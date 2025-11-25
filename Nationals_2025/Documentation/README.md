@@ -1,36 +1,26 @@
-# Reports And Supporting Documents:
+# Reports & Documentation:
 
 ## Table of Contents:
-- Introduction
 - Task List
 - Work Flow and Productivity
-- Work Schedule (Leading up)
 - Work Schedule (At the competition)
-- Networking (mesh)
 - Components and Hardware Checklist
-- Useful Scripts
-
-## Our Current System:
+- Scripts
 
 
-## To Do List
+## To Do List at Competition:
 
 
-## Work Flow and Productivity
-
-
-## Work Schedule (Leading up)
+## Work Flow and Productivity:
 
 
 ## Work Schedule (At the competition)
 
 
-## Networking (mesh)
-
-
 ## Components and Hardware Checklist
 
 
-## Useful Scripts
+# Scripts
+
 
 
