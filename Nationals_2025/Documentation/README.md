@@ -184,6 +184,18 @@ sudo dnf install -y ansible
 sudo mkdir -p /etc/ansible
 sudo nano /etc/ansible/hosts
 ```
+
+**Check public keys available**
+ ls -l ~/.ssh/*.pub 
+
+**Copy key ids to the other compute nodes(shouldn't have to if NFS is enabled**
+ssh-copy-id -i ~/.ssh/id_ed25519.pub rocky@<compute1_ip>
+ssh-copy-id -i ~/.ssh/id_ed25519.pub rocky@<compute2_ip>
+
+**Test ssh using this key**
+ssh -i ~/.ssh/id_ed25519 rocky@10.0.0.162
+ssh -i ~/.ssh/id_ed25519 rocky@10.0.0.94
+
 **Edit /etc/ansible/hosts**
 ```
 [compute]
@@ -192,19 +204,14 @@ compute02 ansible_host=10.0.0.52
 
 [compute:vars]
 ansible_user=rocky
-ansible_ssh_private_key_file=~/.ssh/ansible_key
+ansible_ssh_private_key_file=~/.ssh/id_ed25519  # this is important 
 ```
-3. Generated an SSH key pair and copied the public key to the compute nodes:
+**3. Generated an SSH key pair and copied the public key to the compute nodes:
+**
+Joey will do this with ssh scripts
 
-```
-ssh-keygen -t ed25519 -f ~/.ssh/ansible_key -N ""
-
-# Initially copied the key manually using ssh-copy-id for the first setup
-ssh-copy-id -i ~/.ssh/ansible_key.pub rocky@10.0.0.51
-```
-   
-4. Test connectivity using:
-
+**4. Test connectivity using:
+**
 ```bash
 ansible all -m ping
 ```
@@ -219,7 +226,12 @@ compute02 | SUCCESS => {"changed": false, "ping": "pong"}
 - Nodes are reachable
 
 5. Develop playbooks to automate cluster setup and package installation.
-6. Developed a master playbook cluster_setup.yml
+
+```
+mkdir -p ~/ansible/playbooks
+cd ~/ansible/playbooks
+```
+7. Developed a master playbook cluster_setup.yml
 
 <details>
 <summary><h2>cluster_setup.yml (Version 1)</h2></summary>
@@ -286,7 +298,7 @@ handlers:
   become: yes
 
   vars:
-    headnode_ip: "10.0.0.1"
+    headnode_ip: "<headnode_ip>"
     module_root: "/opt/modules"
 
   tasks:
@@ -356,36 +368,7 @@ handlers:
         name: nftables
         state: started
         enabled: yes
-
-    - name: Deploy basic HPC firewall rules
-      copy:
-        dest: /etc/nftables.conf
-        content: |
-          table inet filter {
-              chain input {
-                  type filter hook input priority 0;
-                  policy drop;
-
-                  # Allow loopback
-                  iif lo accept
-
-                  # Allow established connections
-                  ct state established,related accept
-
-                  # Allow SSH
-                  tcp dport 22 accept
-
-                  # Allow MPI traffic
-                  udp dport 1024-65535 accept
-                  tcp dport 1024-65535 accept
-
-                  # ICMP allowed
-                  icmp type echo-request accept
-                  ip6 nexthdr icmpv6 accept
-              }
-          }
-      notify: restart nftables
-
+    
     #########################################################
     # 5. Create module root and deploy MPI modulefile
     #########################################################
@@ -423,15 +406,6 @@ handlers:
           export MODULEPATH={{ module_root }}:$MODULEPATH
           source /usr/share/lmod/lmod/init/bash
 
-    #########################################################
-    # 7. Create shared directory for cluster storage
-    #########################################################
-    - name: Create shared compute directory
-      file:
-        path: /shared
-        state: directory
-        mode: '0775'
-
   #########################################################
   # HANDLERS
   #########################################################
@@ -455,6 +429,15 @@ handlers:
 </details>
 
 6. Executed the playbook to configure the nodes:
+
+Dry Run
+```
+ansible-playbook cluster_setup.yml --check --diff -i /etc/ansible/hosts
+
+ansible-playbook cluster_setup.yaml --check
+```
+
+Official Run 
 ```
 ansible-playbook -i /etc/ansible/hosts cluster_setup.yml
 ```
