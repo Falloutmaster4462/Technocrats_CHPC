@@ -169,7 +169,7 @@ cat /shared/test.txt  # Should appear on compute nodes
 
 ## 5. Ansible Automation
 
-1. Install Ansible on the control node:
+**Install Ansible on the control node:**
 
 ```bash
 sudo dnf install epel-release -y
@@ -177,7 +177,7 @@ sudo dnf install epel-release -y
 sudo dnf install -y ansible
 ```
 
-2. Create an inventory file listing all nodes.
+**Create an inventory file listing all nodes.**
 
 **Created a simple inventory file /etc/ansible/hosts:**
 ```
@@ -186,16 +186,20 @@ sudo nano /etc/ansible/hosts
 ```
 
 **Check public keys available**
- ls -l ~/.ssh/*.pub 
+``` ls -l ~/.ssh/*.pub ```
 
 **Copy key ids to the other compute nodes(shouldn't have to if NFS is enabled**
+```
 ssh-copy-id -i ~/.ssh/id_ed25519.pub rocky@<compute1_ip>
 ssh-copy-id -i ~/.ssh/id_ed25519.pub rocky@<compute2_ip>
+```
 
 **Test ssh using this key**
+```
 ssh -i ~/.ssh/id_ed25519 rocky@10.0.0.162
 ssh -i ~/.ssh/id_ed25519 rocky@10.0.0.94
 
+```
 **Edit /etc/ansible/hosts**
 ```
 [compute]
@@ -237,10 +241,89 @@ cd ~/ansible/playbooks
 <summary><h2>cluster_setup.yml (Version 1)</h2></summary>
 
 ```
-   - name: Configure HPC Compute Nodes
+  ---
+- name: Configure HPC Headnode
+  hosts: headnode
+  become: yes
+  vars:
+    module_root: "/opt/modules"
+  tasks:
+    #########################################################
+    # 1. Install core packages including LMOD
+    #########################################################
+    - name: Install core packages and LMOD on headnode
+      dnf:
+        name:
+          - chrony
+          - Lmod
+          - wget
+          - make
+          - gcc
+          - gcc-c++
+          - gcc-gfortran
+          - git
+          - nftables
+          - lua
+          - lua-posix
+          - tcl
+          - tcl-devel
+        state: present
+
+    #########################################################
+    # 2. Configure Chrony as NTP server
+    #########################################################
+    - name: Allow local network to sync
+      lineinfile:
+        path: /etc/chrony.conf
+        line: "allow 10.0.0.0/24"
+        create: yes
+
+    - name: Ensure chronyd is running
+      systemd:
+        name: chronyd
+        enabled: yes
+        state: started
+
+    #########################################################
+    # 3. LMOD setup
+    #########################################################
+    - name: Add LMOD initialization script
+      copy:
+        dest: /etc/profile.d/lmod.sh
+        mode: '0755'
+        content: |
+          # Enable LMOD (custom HPC cluster)
+          export MODULEPATH=/opt/modules:$MODULEPATH
+          source /usr/share/lmod/lmod/init/bash
+
+    #########################################################
+    # 4. Create module root directory
+    #########################################################
+    - name: Create module root directory
+      file:
+        path: "{{ module_root }}"
+        state: directory
+        mode: '0755'
+
+    #########################################################
+    # 5. Create shared directory for cluster storage
+    #########################################################
+    - name: Create shared HPC directory
+      file:
+        path: /shared
+        state: directory
+        mode: '0775'
+
+- name: Configure HPC Compute Nodes
   hosts: compute
   become: yes
+  vars:
+    headnode_ip: "10.0.0.80"
+    module_root: "/opt/modules"
   tasks:
+    #########################################################
+    # 1. Install core packages including LMOD
+    #########################################################
     - name: Install core utilities and dependencies
       dnf:
         name:
@@ -252,31 +335,98 @@ cd ~/ansible/playbooks
           - wget
           - make
           - gcc
+          - gcc-c++
+          - gcc-gfortran
           - git
           - nftables
+          - Lmod
+          - lua
+          - lua-posix
+          - tcl
+          - tcl-devel
         state: present
 
-    - name: Configure NTP to sync with head node
+    #########################################################
+    # 2. Configure Chrony to sync from headnode
+    #########################################################
+    - name: Remove default chrony pool entries
       lineinfile:
         path: /etc/chrony.conf
-        regexp: '^pool'
-        line: "server {{ groups['compute'][0] }} iburst"
-        state: present
+        regexp: '^pool '
+        state: absent
+
+    - name: Add headnode as primary NTP server
+      lineinfile:
+        path: /etc/chrony.conf
+        line: "server {{ headnode_ip }} iburst"
+        create: yes
       notify: restart chrony
 
-    - name: Ensure chronyd is enabled and started
+    - name: Ensure chronyd is running
       systemd:
         name: chronyd
         enabled: yes
         state: started
 
-    - name: Set default route via head node (10.0.0.1)
-      lineinfile:
-        path: /etc/sysconfig/network-scripts/ifcfg-eth1
-        line: "GATEWAY=10.0.0.1"
-      notify: restart network
+    #########################################################
+    # 3. Configure nftables
+    #########################################################
+    - name: Ensure nftables is enabled and running
+      systemd:
+        name: nftables
+        state: started
+        enabled: yes
 
-handlers:
+    #########################################################
+    # 4. Create module root and deploy MPI modulefile
+    #########################################################
+    - name: Create module root directory
+      file:
+        path: "{{ module_root }}/mpi"
+        state: directory
+        mode: '0755'
+
+    - name: Create OpenMPI modulefile
+      copy:
+        dest: "{{ module_root }}/mpi/openmpi.lua"
+        mode: '0644'
+        content: |
+          help([[
+          OpenMPI module autogenerated by Ansible
+          ]])
+
+          whatis("Name: OpenMPI")
+          whatis("Version: system")
+          whatis("Description: System-installed OpenMPI")
+
+          prepend_path("PATH", "/usr/lib64/openmpi/bin")
+          prepend_path("LD_LIBRARY_PATH", "/usr/lib64/openmpi/lib")
+
+    #########################################################
+    # 5. Make LMOD available in /etc/profile.d
+    #########################################################
+    - name: Add LMOD initialization script
+      copy:
+        dest: /etc/profile.d/lmod.sh
+        mode: '0755'
+        content: |
+          # Enable LMOD (custom HPC cluster)
+          export MODULEPATH=/opt/modules:/opt/modules/mpi:$MODULEPATH
+          source /usr/share/lmod/lmod/init/bash
+
+    #########################################################
+    # 6. Create shared directory for cluster storage
+    #########################################################
+    - name: Create shared compute directory
+      file:
+        path: /shared
+        state: directory
+        mode: '0775'
+
+  #########################################################
+  # HANDLERS
+  #########################################################
+  handlers:
     - name: restart chrony
       systemd:
         name: chronyd
@@ -286,6 +436,12 @@ handlers:
       systemd:
         name: network
         state: restarted
+
+    - name: restart nftables
+      systemd:
+        name: nftables
+        state: restarted
+
 ```
 </details>
 
@@ -432,15 +588,19 @@ handlers:
 
 Dry Run
 ```
-ansible-playbook cluster_setup.yml --check --diff -i /etc/ansible/hosts
+ansible-playbook setup.yml --check --diff -i /etc/ansible/hosts
 
-ansible-playbook cluster_setup.yaml --check
+ansible-playbook setup.yml --check
 ```
 
 Official Run 
 ```
-ansible-playbook -i /etc/ansible/hosts cluster_setup.yml
+ansible-playbook -i /etc/ansible/hosts setup.yml
 ```
+
+Test:
+
+
 
 **Ansible – Quick Reference**
 
