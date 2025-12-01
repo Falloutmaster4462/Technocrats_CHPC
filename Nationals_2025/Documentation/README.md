@@ -1,54 +1,17 @@
 # Rocky HPC Cluster Setup Documentation
 
 ## Table of Contents
-1. [HPC File Structure](#hpc-file-structure)  
-2. [SSH & User Management](#ssh--user-management)  
-3. [Firewall & Time Synchronization](#firewall--time-synchronization)  
-4. [NFS (Network File Sharing) Setup](#nfs-network-file-sharing-setup)  
-5. [Ansible Automation](#ansible-automation)  
-6. [LMOD Modules](#lmod-modules)  
-7. [Compiling OpenBLAS & OpenMPI](#compiling-openblas--openmpi)  
-8. [SLURM Setup](#slurm-setup)  
-9. [Grafana Monitoring](#grafana-monitoring)  
-10. [Benchmarks](#benchmarks)  
+1. [SSH & User Management](#ssh--user-management)  
+2. [Firewall & Time Synchronization](#firewall--time-synchronization)  
+3. [NFS (Network File Sharing) Setup](#nfs-network-file-sharing-setup)  
+4. [Ansible Automation](#ansible-automation)  
+5. [LMOD Modules](#lmod-modules)  
+6. [Compiling OpenBLAS & OpenMPI](#compiling-openblas--openmpi)  
+7. [SLURM Setup](#slurm-setup)  
+9. [Benchmarks](#benchmarks)  
 
 ---
-
-## 1. Create HPC File Structure
-
-```bash
-sudo mkdir -p /HPC_scripts/{benchmarks,datasets,modules,scripts,results,logs}
-
-sudo mkdir -p /HPC_scripts/benchmarks/openmpi/5.0.0
-sudo mkdir -p /HPC_scripts/modules/mpi
-
-# Benchmark Directories (slurm & config only)
-for b in hpcc hpcg ambermd ascot5 dftbplus hemelb openfoam matlab; do
-    sudo mkdir -p /HPC_scripts/benchmarks/$b/{config,slurm}
-done
-
-# Datasets
-for b in hpcc hpcg ambermd ascot5 dftbplus hemelb openfoam matlab; do
-    sudo mkdir -p /HPC_scripts/datasets/$b
-done
-
-
-# Lmod Modules (empty `.lua` files)
-for b in hpcc hpcg ambermd ascot5 dftbplus hemelb openfoam matlab; do
-    sudo touch /HPC_scripts/modules/$b.lua
-done
-sudo touch /HPC_scripts/modules/mpi/openmpi-5.0.lua
-
-# Results & Logs
-for b in hpcc hpcg ambermd ascot5 dftbplus hemelb openfoam matlab; do
-    sudo mkdir -p /HPC_scripts/results/$b
-    sudo mkdir -p /HPC_scripts/logs/$b
-done
-```
-
----
-
-## 2. SSH & User Management
+## 1. SSH & User Management
 
 **SSH & ProxyJump – Quick Reference**
 
@@ -106,7 +69,7 @@ sudo dnf install -y tmux btop
 
 ---
 
-## 3. Firewall & Time Synchronization
+## 2. Firewall & Time Synchronization
 
 * Configure **nftables/iptables** to allow SSH.
 * Install **chrony** to synchronize time across nodes:
@@ -118,7 +81,7 @@ sudo systemctl enable --now chronyd
 
 ---
 
-## 4. NFS (Network File Sharing) Setup
+## 3. NFS (Network File Sharing) Setup
 
 **Head Node (Server)**
 
@@ -167,7 +130,7 @@ cat /shared/test.txt  # Should appear on compute nodes
 
 ---
 
-## 5. Ansible Automation
+## 4. Ansible Automation
 
 **Install Ansible on the control node:**
 
@@ -208,13 +171,14 @@ compute02 ansible_host=10.0.0.52
 
 [compute:vars]
 ansible_user=rocky
-ansible_ssh_private_key_file=~/.ssh/id_ed25519  # this is important 
+ansible_ssh_private_key_file=/home/rocky/.ssh/id_ed25519 
+
 ```
-**3. Generated an SSH key pair and copied the public key to the compute nodes:
-**
+** Generated an SSH key pair and copied the public key to the compute nodes:**
+
 Joey will do this with ssh scripts
 
-**4. Test connectivity using:
+** Test connectivity using:
 **
 ```bash
 ansible all -m ping
@@ -229,14 +193,13 @@ compute02 | SUCCESS => {"changed": false, "ping": "pong"}
 - SSH keys work
 - Nodes are reachable
 
-5. Develop playbooks to automate cluster setup and package installation.
-
+**Develop playbooks to automate cluster setup and package installation.**
 ```
 mkdir -p ~/ansible/playbooks
 cd ~/ansible/playbooks
 ```
-7. Developed a master playbook cluster_setup.yml
-
+**Developed a master playbook cluster_setup.yml
+**
 <details>
 <summary><h2>cluster_setup.yml (Version 1)</h2></summary>
 
@@ -584,7 +547,7 @@ cd ~/ansible/playbooks
 ```
 </details>
 
-6. Executed the playbook to configure the nodes:
+**Executed the playbook to configure the nodes:**
 
 Dry Run
 ```
