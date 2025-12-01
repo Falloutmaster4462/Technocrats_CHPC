@@ -1,0 +1,156 @@
+  GNU nano 5.6.1                                                                                                                       install_hpcg.sh
+#!/bin/bash
+#
+# HPCG (High Performance Conjugate Gradients) Installation Script for Rocky Linux 9
+# Run this script on head node, com1, and com2
+# Usage: sudo bash install_hpcg.sh
+#
+
+set -e
+
+echo "=========================================="
+echo "HPCG Installation Script for Rocky Linux 9"
+echo "=========================================="
+echo ""
+
+# Check if running as root
+if [ "$EUID" -ne 0 ]; then
+    echo "Please run as root or with sudo"
+    exit 1
+fi
+
+# Disable problematic HPCC Systems repo if it exists
+if [ -f /etc/yum.repos.d/hpccsystems.repo ]; then
+    echo "Disabling conflicting HPCC Systems repository..."
+    sed -i 's/enabled=1/enabled=0/g' /etc/yum.repos.d/hpccsystems.repo
+fi
+
+# Update system
+echo "[1/5] Updating system packages..."
+dnf update -y --skip-broken
+
+# Install development tools and dependencies
+echo "[2/5] Installing development tools and dependencies..."
+dnf groupinstall -y "Development Tools"
+dnf install -y \
+    gcc \
+    gcc-c++ \
+    gcc-gfortran \
+    make \
+    cmake \
+    git \
+    wget \
+    openmpi \
+    openmpi-devel \
+    openblas \
+    openblas-devel
+
+# Load OpenMPI module
+echo "[3/5] Setting up OpenMPI environment..."
+export PATH=/usr/lib64/openmpi/bin:$PATH
+export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH
+
+# Add OpenMPI to profile (permanent)
+if [ ! -f /etc/profile.d/openmpi.sh ]; then
+    cat > /etc/profile.d/openmpi.sh << 'EOF'
+export PATH=/usr/lib64/openmpi/bin:$PATH
+export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH
+EOF
+    chmod +x /etc/profile.d/openmpi.sh
+fi
+
+# Create installation directory
+INSTALL_DIR="/opt/hpcg"
+mkdir -p $INSTALL_DIR
+cd $INSTALL_DIR
+
+# Clone HPCG repository
+                                   echo "[4/5] Cloning HPCG repository..."
+if [ -d "hpcg" ]; then
+    echo "HPCG directory already exists. Removing..."
+    rm -rf hpcg
+fi
+
+git clone https://github.com/hpcg-benchmark/hpcg.git
+cd hpcg
+
+# Create setup directory
+mkdir -p setup
+
+# Create configuration file for Linux with OpenMPI
+echo "[5/5] Creating build configuration and compiling..."
+cat > setup/Make.Linux_MPI << EOF
+SHELL        = /bin/sh
+CD           = cd
+CP           = cp
+LN_S         = ln -s
+MKDIR        = mkdir -p
+RM           = /bin/rm -f
+TOUCH        = touch
+ARCH         = Linux_MPI
+TOPdir       = $INSTALL_DIR/hpcg
+SRCdir       = \$(TOPdir)/src
+INCdir       = \$(TOPdir)/src
+BINdir       = \$(TOPdir)/bin
+CXX          = mpicxx
+CXXFLAGS     = -O3 -ffast-math -ftree-vectorize -fopenmp
+LINKER       = \$(CXX)
+LINKFLAGS    = \$(CXXFLAGS)
+ARCHIVER     = ar
+ARFLAGS      = r
+RANLIB       = echo
+HPCG_OPTS    =
+HPCG_INCLUDES = -I\$(INCdir) -I\$(INCdir)/\$(ARCH)
+HPCG_LIBS    =
+EOF
+
+# Configure HPCG
+echo "Running configure..."
+./configure Linux_MPI
+
+# Build HPCG
+if [ -d "build/Linux_MPI" ]; then
+    echo "Building HPCG..."
+    cd build/Linux_MPI
+    make
+else
+    echo "ERROR: Configuration failed - build directory not created"
+    exit 1
+fi
+
+# Verify installation
+if [ -f "bin/xhpcg" ]; then
+    echo ""
+    echo "=========================================="
+    echo "HPCG Installation Complete!"
+    echo "=========================================="
+    echo ""
+    echo "HPCG binary location: $INSTALL_DIR/hpcg/build/Linux_MPI/bin/xhpcg"
+
+    # Copy binary to /usr/local/bin for easier access
+    cp bin/xhpcg /usr/local/bin/
+    echo "HPCG binary copied to /usr/local/bin/xhpcg"
+    echo ""
+
+    # Create example configuration file
+    cat > $INSTALL_DIR/hpcg/hpcg.dat.example << 'EOFCONFIG'
+HPCG benchmark input file
+Sandia National Laboratories; University of Tennessee, Knoxville
+104 104 104
+60
+EOFCONFIG
+
+    chmod 644 $INSTALL_DIR/hpcg/hpcg.dat.example
+    echo "Example hpcg.dat created at: $INSTALL_DIR/hpcg/hpcg.dat.example"
+    echo ""
+
+else
+    echo ""
+    echo "=========================================="
+    echo "ERROR: HPCG build failed!"
+    echo "=========================================="
+    exit 1
+fi
+
+echo "Note: Run this script on all nodes (head, com1, com2)"
+echo ""

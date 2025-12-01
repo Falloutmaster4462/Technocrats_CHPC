@@ -114,18 +114,11 @@ RDMA Support: Enabled on all NICs
 
 ### Operating System
 
-**NixOS 24.05**
-- Declarative configuration
-- Reproducible builds
-- Atomic upgrades/rollbacks
-- Binary caching support
+
 
 ### Deployment Tools
 
-1. **nixos-anywhere**: Initial OS installation from bare metal
-2. **Colmena**: Configuration management and updates during competition
-3. **disko**: Declarative disk partitioning
-4. **Nix Flakes**: Package management and build system
+
 
 ### Compilers & Libraries
 
@@ -254,5 +247,6 @@ For a task to be considered complete, it must meet the following criteria:
 **Team**: Technocrats - "Shaka Zulu"  
 **Competition**: CSIR CHPC Student Cluster Competition 2025  
 **Hardware**: HPE ProLiant Gen11 Servers with Intel Xeon Gold 6448H
+
 
 

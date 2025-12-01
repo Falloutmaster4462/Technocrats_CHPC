@@ -1,0 +1,218 @@
+Based on the detailed logs in `AMber errors.txt`, here is the **Comprehensive "Minimal Fast Build" Installation Guide for AmberTools 25**.
+
+This documentation is compiled specifically to navigate the errors encountered in your cluster environment (Rocky Linux 9), including disk space limitations, missing dependencies (`bzip2-devel`), and module system failures.
+
+-----
+
+# AmberTools 25 Cluster Installation & Configuration Guide
+
+**System:** Rocky Linux 9 | **Target:** 3-Node Cluster (Headnode, Com1, Com2) | **Strategy:** Minimal MPI Fast Build
+
+## 1\. Pre-Installation & Critical Dependencies
+
+*Context: The logs showed build failures on Com2 due to missing `bzip2-devel` and module loading errors on Com1.*
+
+Perform these steps on **ALL NODES** (Headnode, Com1, Com2) to ensure a consistent environment.
+
+### 1.1. Install System Dependencies
+
+We install `bzip2-devel` specifically to prevent the Boost library build failure seen in the logs.
+
+```bash
+# Run on Headnode, Com1, and Com2
+sudo dnf install -y gcc gcc-c++ gcc-gfortran make cmake \
+    openmpi openmpi-devel flex bison \
+    patch bc wget which file \
+    python3 python3-devel \
+    zlib-devel bzip2-devel
+```
+
+### 1.2. Configure OpenMPI Environment
+
+*Context: The command `module load mpi/openmpi-x86_64` failed with "unknown module". We will bypass the module system and set paths directly.*
+
+Add these lines to your `~/.bashrc` file on **ALL NODES** to ensure MPI is always available:
+
+```bash
+# Append to .bashrc
+cat >> ~/.bashrc << 'EOF'
+export PATH=/usr/lib64/openmpi/bin:$PATH
+export LD_LIBRARY_PATH=/usr/lib64/openmpi/lib:$LD_LIBRARY_PATH
+EOF
+
+# Reload the configuration immediately
+source ~/.bashrc
+```
+
+**Verification:**
+Run `which mpicc` and `mpirun --version`. If these output version information, your environment is correct.
+
+-----
+
+## 2\. Headnode Installation (Master Build)
+
+*Context: The Headnode ran out of disk space ("No Space Left on Device"). We will perform a clean, minimal build and remove source files immediately after.*
+
+### 2.1. Clean Previous Attempts
+
+Free up space by removing old build artifacts.
+
+```bash
+cd ~
+rm -rf ambertools25_src
+rm -rf amber_cluster_benchmark
+```
+
+### 2.2. Extract & Prepare Build Directory
+
+```bash
+# Extract the source archive
+tar xjf ambertools25.tar.bz2
+
+# Enter directory and create a build folder
+cd ambertools25_src
+mkdir -p build
+cd build
+```
+
+### 2.3. Run "Minimal Fast Build" Configuration
+
+*Context: This CMake configuration is optimized to save space and time (15 mins vs 60 mins). It disables GUI, Python, and Serial components, building ONLY the MPI versions required for the cluster.*
+
+```bash
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=$HOME/amber \
+    -DCOMPILER=GNU \
+    -DMPI=TRUE \
+    -DCUDA=FALSE \
+    -DOPENMP=FALSE \
+    -DDOWNLOAD_MINICONDA=FALSE \
+    -DINSTALL_TESTS=FALSE \
+    -DBUILD_QUICK_TEST=FALSE \
+    -DBUILD_GUI=FALSE \
+    -DBUILD_PYTHON=FALSE \
+    -DCHECK_UPDATES=FALSE \
+    -DMPI_C_COMPILER=/usr/lib64/openmpi/bin/mpicc \
+    -DMPI_CXX_COMPILER=/usr/lib64/openmpi/bin/mpicxx \
+    -DMPI_Fortran_COMPILER=/usr/lib64/openmpi/bin/mpifort
+```
+
+### 2.4. Compile & Install
+
+We build *only* `pmemd.MPI` and `sander.MPI` to save time.
+
+```bash
+make -j8 pmemd.MPI sander.MPI
+make install
+```
+
+### 2.5. Post-Install Cleanup
+
+**Critical Step:** Immediately remove the source folder to recover \~2-3GB of space on the Headnode.
+
+```bash
+cd ~
+rm -rf ambertools25_src
+```
+
+-----
+
+## 3\. Compute Node Installation (Com1 & Com2)
+
+*Context: You must repeat the installation on Com1 and Com2 because they do not share the `/home` directory with the Headnode.*
+
+**Option A: Scripted Install (Recommended)**
+Create this script on the Headnode and copy it to the compute nodes to automate the process.
+
+**File: `install_node.sh`**
+
+```bash
+#!/bin/bash
+set -e
+
+# 1. Clean previous builds
+cd ~
+rm -rf ambertools25_src build
+
+# 2. Extract
+tar xjf ambertools25.tar.bz2
+cd ambertools25_src
+mkdir build && cd build
+
+# 3. Configure (Minimal MPI)
+cmake .. \
+    -DCMAKE_INSTALL_PREFIX=$HOME/amber \
+    -DCOMPILER=GNU \
+    -DMPI=TRUE \
+    -DCUDA=FALSE \
+    -DOPENMP=FALSE \
+    -DDOWNLOAD_MINICONDA=FALSE \
+    -DINSTALL_TESTS=FALSE \
+    -DBUILD_GUI=FALSE \
+    -DBUILD_PYTHON=FALSE \
+    -DMPI_C_COMPILER=/usr/lib64/openmpi/bin/mpicc \
+    -DMPI_CXX_COMPILER=/usr/lib64/openmpi/bin/mpicxx \
+    -DMPI_Fortran_COMPILER=/usr/lib64/openmpi/bin/mpifort
+
+# 4. Build & Install
+make -j8 pmemd.MPI sander.MPI
+make install
+
+# 5. Cleanup
+cd ~
+rm -rf ambertools25_src
+echo "Installation Complete on $(hostname)"
+```
+
+**Execute on Nodes:**
+
+```bash
+# Copy installer and source to Com1
+scp ambertools25.tar.bz2 install_node.sh rocky@10.0.0.162:~/
+ssh rocky@10.0.0.162 "bash install_node.sh"
+
+# Copy installer and source to Com2
+scp ambertools25.tar.bz2 install_node.sh rocky@10.0.0.94:~/
+ssh rocky@10.0.0.94 "bash install_node.sh"
+```
+
+-----
+
+## 4\. Cluster Execution & Verification
+
+*Context: The logs showed issues with the `hostfile` location due to full disk space. We will use `/tmp` to avoid this.*
+
+### 4.1. Create Hostfile in /tmp
+
+```bash
+# Run on Headnode
+cat > /tmp/hostfile << 'EOF'
+10.0.0.80 slots=8
+10.0.0.162 slots=8
+10.0.0.94 slots=8
+EOF
+```
+
+### 4.2. Verify Amber Environment on All Nodes
+
+Ensure the `amber.sh` environment script is sourced in `.bashrc` on all nodes.
+
+```bash
+# Add Amber to path on all nodes
+for ip in 10.0.0.80 10.0.0.162 10.0.0.94; do
+    ssh rocky@$ip "echo 'source ~/amber/amber.sh' >> ~/.bashrc"
+done
+```
+
+### 4.3. Run Cluster Smoke Test
+
+Run a quick check to see if `pmemd.MPI` responds from all nodes.
+
+```bash
+mpirun -np 24 --hostfile /tmp/hostfile \
+    --mca btl_tcp_if_include eth0 \
+    --mca oob_tcp_if_include eth0 \
+    bash -c 'source ~/.bashrc && pmemd.MPI --version'
+```
+
+If successful, you will see the Amber version printed 24 times (once per core). You are now ready to run your full benchmarks.
