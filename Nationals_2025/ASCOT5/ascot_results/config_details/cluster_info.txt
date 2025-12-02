@@ -1,0 +1,21 @@
+ASCOT5 Cluster Benchmark Results
+================================
+Generated: Mon Dec  1 07:45:03 PM EST 2025
+Cluster Size: 3 nodes, 92 cores
+
+Node Configuration:
+  headnode (192.168.0.1): Intel Xeon Gold 6448H, 28 cores, 96GB RAM
+  com1 (192.168.0.2): Intel Xeon Gold 6448H, 32 cores, 96GB RAM  
+  com2 (192.168.0.3): Intel Xeon Gold 6448H, 32 cores, 96GB RAM
+
+MPI Configuration:
+  Total processes: 92
+  Hostfile: /shared/benchmarks/hostfile
+  Working directory: /shared/benchmarks/ascotfive/multi
+
+Benchmarks Completed:
+  - Benchmark1-8000
+  - Benchmark2-200000
+
+Execution Times:
+  Total: 733 seconds
